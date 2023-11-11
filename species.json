@@ -1,0 +1,10 @@
+[
+	{"name": "tyrannosaurus", "diet": "C"},
+	{"name": "velociraptor", "diet": "C"},
+	{"name": "Spinosaurus", "diet": "C"},
+	{"name": "Megalosaurus", "diet": "C"},
+	{"name": "Brachiosaurus", "diet": "H"},
+	{"name": "Stegosaurus", "diet": "H"},
+	{"name": "Ankylosaurus", "diet": "H"},
+	{"name": "Triceratops", "diet": "H"}
+]

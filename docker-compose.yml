@@ -1,0 +1,37 @@
+version: '3.1'
+
+services:
+  db:
+    image: postgres:14-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: dino
+    ports:
+      - 5432:5432
+    volumes:
+      - ./dataset:/docker-entrypoint-initdb.d
+
+  dino_svr:
+    image: dino_svr:latest
+    security_opt:
+      - seccomp:unconfined
+    environment:
+      ENV_DB_HOST: "db"
+      ENV_DB_PORT: 5432
+      ENV_DB_NAME: "postgres"
+      ENV_DB_USR: "postgres"
+      ENV_DB_PWD: "dino"
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    entrypoint:
+      [
+        "bash",
+        "-c",
+        "sleep 5; /app/svr",
+      ]
+    restart: "no"
+   
+
+
