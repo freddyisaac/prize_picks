@@ -83,7 +83,7 @@ To start issue
 ```docker compose -f docker-compose.yml up```
 All being well both the database and server will start and be available on port ``8000``
 
-_NOTE_ I did notice that despite the specified depndency of the server on the postgres database that on occasion the server would start before the postgres endpoint was ready to accept connections. To avoid this a small sleep was added prior to starting the app server. It is possible that this may not be sufficient depending upon system performance and needs increasing to ensure that correct boot sequence is followed.
+_NOTE_ I did notice that despite the specified dependency of the server on the postgres database that on occasion the server would start before the postgres endpoint was ready to accept connections. To avoid this a small sleep was added prior to starting the app server. It is possible that this may not be sufficient depending upon system performance and needs increasing to ensure that correct boot sequence is followed.
 
 
 ## Data Model
