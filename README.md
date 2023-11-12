@@ -189,4 +189,5 @@ should recreate them and place the generated output in the ``mocks/`` directory
 6. The cage capacity should be configurable
 7. Improve error messages from the data access layer
 8. Improve the documentation for th rest api
-9. code comments 
+9. Code comments
+10. No mechanism exists for removing dinosaurs, removing cages or transferring dinosaurs between cages
