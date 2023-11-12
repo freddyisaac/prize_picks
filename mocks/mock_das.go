@@ -117,18 +117,18 @@ func (mr *MockDataAccessProviderMockRecorder) GetDinosaursForCage(ctx, cageID in
 }
 
 // NewCage mocks base method.
-func (m *MockDataAccessProvider) NewCage(ctx context.Context, kind string) (int, error) {
+func (m *MockDataAccessProvider) NewCage(ctx context.Context, cap int, kind string) (int, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "NewCage", ctx, kind)
+	ret := m.ctrl.Call(m, "NewCage", ctx, cap, kind)
 	ret0, _ := ret[0].(int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // NewCage indicates an expected call of NewCage.
-func (mr *MockDataAccessProviderMockRecorder) NewCage(ctx, kind interface{}) *gomock.Call {
+func (mr *MockDataAccessProviderMockRecorder) NewCage(ctx, cap, kind interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewCage", reflect.TypeOf((*MockDataAccessProvider)(nil).NewCage), ctx, kind)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewCage", reflect.TypeOf((*MockDataAccessProvider)(nil).NewCage), ctx, cap, kind)
 }
 
 // PlaceDinosaurInCage mocks base method.

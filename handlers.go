@@ -79,16 +79,28 @@ func (ah AppHandlers) AddDinosaur(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ah AppHandlers) AddCage(w http.ResponseWriter, r *http.Request) {
-	log.Printf("adding cage")
+	var err error
 	vars := mux.Vars(r)
 	kind := vars["diet"]
+	paramCap := r.URL.Query().Get("cap")
+	cap := CageCapacity
+	if len(paramCap) != 0 {
+		cap, err = strconv.Atoi(paramCap)
+		if err != nil {
+			WriteMsg(w, http.StatusBadRequest, "bad capacity parameter must be an integer")
+			return
+		}
+		if cap < 1 {
+			WriteMsg(w, http.StatusBadRequest, "bad capacity parameter value must be > 0")
+			return
+		}
+	}
 	var id int
-	var err error
 	switch kind {
 	case "H":
-		id, err = ah.dap.NewCage(r.Context(), HerbivoreCode)
+		id, err = ah.dap.NewCage(r.Context(), cap, HerbivoreCode)
 	case "C":
-		id, err = ah.dap.NewCage(r.Context(), CarnivoreCode)
+		id, err = ah.dap.NewCage(r.Context(), cap, CarnivoreCode)
 	default:
 		WriteMsg(w, http.StatusBadRequest, "diet must be H (herbivore) V (carnivore)")
 		return

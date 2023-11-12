@@ -1,10 +1,27 @@
 #!/bin/sh
 
-if [ "$1" == "" ]; then
 CAGE_DIET="H"
-else
-CAGE_DIET=$1
-fi
+CAGE_PARAM=""
 
-curl -v -X POST http://localhost:8000/cage/${CAGE_DIET}/add
+while [[ $# -gt 0 ]]; do
+        case $1 in
+		-diet)
+			CAGE_DIET="$2"
+			shift
+			shift
+			;;
+		-cap)
+			CAGE_CAP="$2"
+			shift
+			shift
+			CAGE_PARAM="?cap="$CAGE_CAP
+			;;
+		-h)
+			echo "add_cage.sh -diet <H|C> -cap <cage dinosaur capacity>"
+			shift
+			;;
+		esac
+done
+
+curl -v -X POST http://localhost:8000/cage/${CAGE_DIET}/add${CAGE_PARAM}
 
