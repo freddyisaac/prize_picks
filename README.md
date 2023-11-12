@@ -110,7 +110,7 @@ This list cages in json for the provided status. Status must be either ACTIVE or
 
 ```POST /cage/{diet}/add```
 
-This will create a new cage for the given dietary requirements of the species to be placed therein. It takes no payload. The diet must be either _H_ or _C_ or an error will be returned. There is no payload for this and it will be ignored if passed. The reply upon success will be the numerical identifier of the cage in json format.
+This will create a new cage for the given dietary requirements of the species to be placed therein. It takes no payload. The diet must be either _H_ or _C_ or an error will be returned. There is no payload for this and it will be ignored if passed. The reply upon success will be the numerical identifier of the cage in json format. This api call takes an optional ``cap=`` parameter that will specify the dinosaur capacity.
 
 ```GET /cage/{cageid}/list_dinosaurs```
 
@@ -165,7 +165,7 @@ lists the dinosaurs. If a command line paramater then the dinosaurs for a given 
 
 Set the status of a given cage to the provided status
 
-```add_cage.sh <H|C>```
+```add_cage.sh -diet <H|C> -cap <capacity>```
 
 Create a new cage of th specified dietary requirements. It takes a single paramater specifying the dietary requirements.
 
