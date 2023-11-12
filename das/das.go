@@ -13,7 +13,7 @@ import (
 // poorly organised monolithic data access interface
 // should make more modular
 type DataAccessProvider interface {
-	NewCage(ctx context.Context, kind string) (int, error)
+	NewCage(ctx context.Context, cap int, kind string) (int, error)
 	AddDinosaur(ctx context.Context, d Dinosaur) error
 	PlaceDinosaurInCage(ctx context.Context, cageID int, d Dinosaur) error
 	GetCages(ctx context.Context, optStatus ...string) ([]Cage, error)
@@ -105,10 +105,13 @@ func ValidStatus(status string) bool {
 	return false
 }
 
-func (pdb *PsqlDataProvider) NewCage(ctx context.Context, kind string) (int, error) {
+func (pdb *PsqlDataProvider) NewCage(ctx context.Context, cap int, kind string) (int, error) {
+	if cap < 1 {
+		return -1, fmt.Errorf("cage capacity < 1 not permitted")
+	}
 	sqlStmt := `INSERT INTO cages (status, capacity, count, kind) VALUES ($1, $2, $3, $4) RETURNING id`
 	var id int
-	err := pdb.db.QueryRow(sqlStmt, StatusActive, CageCapacity, 0, kind).Scan(&id)
+	err := pdb.db.QueryRow(sqlStmt, StatusActive, cap, 0, kind).Scan(&id)
 	return id, err
 }
 
@@ -131,7 +134,7 @@ func (pdb *PsqlDataProvider) GetFreeCage(ctx context.Context, diet string) (int,
 		count++
 	}
 	if count == 0 {
-		id, err = pdb.NewCage(ctx, diet)
+		id, err = pdb.NewCage(ctx, CageCapacity, diet)
 		if err != nil {
 			return 0, err
 		}
