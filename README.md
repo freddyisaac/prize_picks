@@ -29,6 +29,8 @@ The server does require a reference file which lists the permitted dinosaurs and
 
 If the server is not executed in the same directory as this file then the full path can be specified using the ``-sf`` option on the command line
 
+The server unless configured otherwise will startup and listen on ``:8000``. It can be quickly test by using ``curl http://localhost:8000/healthcheck`` which should return ``http 200`` and an "ok" message.
+
 ### Stand alone server mode
 To build the server use
 
@@ -151,7 +153,8 @@ make test
 ```
 
 ## Scripts
-In order to assist testing some scripts have been provided in the ``scripts/`` directory. Most are quite self explanatory and use ``curl`` so the api invoked can be checked with the above documentation
+In order to assist testing some scripts have been provided in the ``scripts/`` directory. Most are quite self explanatory and use ``curl`` so the api invoked can be checked with the above documentation.
+All of the test scripts us ``curl`` and default to a hostname of ``localhost:8000``. Should the server be configured to listen on a different endpoint they will require modification.
 
 ```list_cages.sh``` - lists available cages
 
