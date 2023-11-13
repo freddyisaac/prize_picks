@@ -10,6 +10,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// TODO: MAP DB LEVEL ERRORS TO APP LEVEL ERRORS
 // poorly organised monolithic data access interface
 // should make more modular
 type DataAccessProvider interface {
@@ -47,7 +48,6 @@ func (pdb *PsqlDataProvider) Close() {
 
 // place dinosaur in a given cage
 // this does not enforce constraints correctly and my be subject to race condition
-// leading to an overly cramped cage
 // probably requires row level locking and transactional integrity
 func (pdb *PsqlDataProvider) PlaceDinosaurInCage(ctx context.Context, cageID int, d Dinosaur) error {
 	err := pdb.CheckCage(ctx, cageID, d.Diet)
@@ -59,6 +59,7 @@ func (pdb *PsqlDataProvider) PlaceDinosaurInCage(ctx context.Context, cageID int
 	return err
 }
 
+// check if cage has capacity and meets dietary requirements
 func (pdb *PsqlDataProvider) CheckCage(ctx context.Context, cageID int, diet string) error {
 	sqlStmt := `UPDATE cages SET  count=count+1 WHERE id = $1 AND kind = $2 AND count < capacity`
 	res, err := pdb.db.ExecContext(ctx, sqlStmt, cageID, diet)
@@ -75,8 +76,6 @@ func (pdb *PsqlDataProvider) CheckCage(ctx context.Context, cageID int, diet str
 	return fmt.Errorf("unable to place dino in cage %d", cageID)
 }
 
-// TODO: MAP DB LEVEL ERRORS TO APP LEVEL ERRORS
-
 func (pdb *PsqlDataProvider) AddDinosaur(ctx context.Context, d Dinosaur) error {
 	// this could be a code const but is probably ok for the demo
 	id, err := pdb.GetFreeCage(ctx, d.Diet)
@@ -89,22 +88,7 @@ func (pdb *PsqlDataProvider) AddDinosaur(ctx context.Context, d Dinosaur) error 
 	return err
 }
 
-const (
-	StatusDown   = "DOWN"
-	StatusActive = "ACTIVE"
-	CageCapacity = 20
-)
-
-func ValidStatus(status string) bool {
-	switch status {
-	case StatusDown, StatusActive:
-		return true
-	default:
-		return false
-	}
-	return false
-}
-
+// create a new cage of given capacity and diet
 func (pdb *PsqlDataProvider) NewCage(ctx context.Context, cap int, kind string) (int, error) {
 	if cap < 1 {
 		return -1, fmt.Errorf("cage capacity < 1 not permitted")
@@ -117,6 +101,8 @@ func (pdb *PsqlDataProvider) NewCage(ctx context.Context, cap int, kind string) 
 
 // get a free cage of the required type
 // if none is available then create a new one
+// this suffers from referential integrity problems
+// requires row level locking and transaction integrity being enforced
 func (pdb *PsqlDataProvider) GetFreeCage(ctx context.Context, diet string) (int, error) {
 	sqlStmt := `SELECT id FROM cages WHERE ( count < capacity ) AND status = "ACTIVE" AND kind = $1 FOR UPDATE`
 	rows, err := pdb.db.QueryContext(ctx, sqlStmt, diet)
@@ -143,6 +129,7 @@ func (pdb *PsqlDataProvider) GetFreeCage(ctx context.Context, diet string) (int,
 	return id, nil
 }
 
+// return persisted cages
 func (pdb *PsqlDataProvider) GetCages(ctx context.Context, optStatus ...string) ([]Cage, error) {
 	var cages []Cage
 	var opts []interface{}
