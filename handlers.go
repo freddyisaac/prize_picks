@@ -282,16 +282,16 @@ func (ah AppHandlers) AddDinoToCage(w http.ResponseWriter, r *http.Request) {
 // create mux and start server
 func StartServer(ctx context.Context, listenAddr string, appHandlers *AppHandlers) error {
 	r := mux.NewRouter()
-	r.HandleFunc("/healthcheck", appHandlers.healthcheck).Methods("GET")
-	r.HandleFunc("/dino/add", appHandlers.AddDinosaur).Methods("POST")
-	r.HandleFunc("/dino/list", appHandlers.GetDinosaurs).Methods("GET")
-	r.HandleFunc("/cages", appHandlers.GetCages).Methods("GET")
-	r.HandleFunc("/cage/{diet}/add", appHandlers.AddCage).Methods("POST")
-	r.HandleFunc("/cage/{cageid}/list_dinosaurs", appHandlers.GetCageDinosaurs).Methods("GET")
-	r.HandleFunc("/cage/{cageid}/status/{status}", appHandlers.SetCageStatus).Methods("POST")
-	r.HandleFunc("/cage/{cageid}/add_dino", appHandlers.AddDinoToCage).Methods("POST")
-	r.HandleFunc("/species/add", appHandlers.AddSpecies).Methods("POST")
-	r.HandleFunc("/species/list", appHandlers.ListSpecies).Methods("GET")
+	r.HandleFunc("/v1/healthcheck", appHandlers.healthcheck).Methods("GET")
+	r.HandleFunc("/v1/dino/add", appHandlers.AddDinosaur).Methods("POST")
+	r.HandleFunc("/v1/dino/list", appHandlers.GetDinosaurs).Methods("GET")
+	r.HandleFunc("/v1/cages", appHandlers.GetCages).Methods("GET")
+	r.HandleFunc("/v1/cage/{diet}/add", appHandlers.AddCage).Methods("POST")
+	r.HandleFunc("/v1/cage/{cageid}/list_dinosaurs", appHandlers.GetCageDinosaurs).Methods("GET")
+	r.HandleFunc("/v1/cage/{cageid}/status/{status}", appHandlers.SetCageStatus).Methods("POST")
+	r.HandleFunc("/v1/cage/{cageid}/add_dino", appHandlers.AddDinoToCage).Methods("POST")
+	r.HandleFunc("/v1/species/add", appHandlers.AddSpecies).Methods("POST")
+	r.HandleFunc("/v1/species/list", appHandlers.ListSpecies).Methods("GET")
 
 	server := http.Server{
 		Addr:    listenAddr,

@@ -1,4 +1,4 @@
 #!/bin/sh
 
-curl -vv http://localhost:8000/cages | jq
+curl -vv http://localhost:8000/v1/cages | jq
 
