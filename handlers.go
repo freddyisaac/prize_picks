@@ -303,7 +303,9 @@ func StartServer(ctx context.Context, listenAddr string, appHandlers *AppHandler
 		<-ctx.Done()
 		// received context done
 		// shutdown server
-		server.Shutdown(context.Background())
+		if err := server.Shutdown(context.Background()); err != nil {
+			log.Printf("error shutting down server : %v", err)
+		}
 	}()
 	log.Printf("Starting serv on %s", listenAddr)
 	err := server.ListenAndServe()
