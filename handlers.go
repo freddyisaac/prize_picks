@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -17,17 +18,19 @@ var (
 	MesgOK = []byte(`{"msg":"ok"}`)
 )
 
+// Core application data structure
 type AppHandlers struct {
 	dap        DataAccessProvider
 	speciesMap *GenMap[string, string]
 }
 
-// check that species matches those that are permitted
+// check species against in memory species list
 func (ah AppHandlers) CheckSpecies(speciesName string) bool {
 	_, ok := ah.speciesMap.Load(speciesName)
 	return ok
 }
 
+// add species to in memory list
 func (ah AppHandlers) NewSpecies(name, diet string) bool {
 	diet = strings.ToUpper(diet)
 	if diet != HerbivoreCode && diet != CarnivoreCode {
@@ -37,6 +40,7 @@ func (ah AppHandlers) NewSpecies(name, diet string) bool {
 	return true
 }
 
+// write message back to client utility
 func WriteMsg(w http.ResponseWriter, status int, msg string) {
 	w.WriteHeader(status)
 	_, err := w.Write([]byte(msg))
@@ -45,6 +49,7 @@ func WriteMsg(w http.ResponseWriter, status int, msg string) {
 	}
 }
 
+// write http success utiliry
 func WriteOk(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusOK)
 	_, err := w.Write(MesgOK)
@@ -53,10 +58,12 @@ func WriteOk(w http.ResponseWriter) {
 	}
 }
 
+// app server health responder
 func (ah AppHandlers) healthcheck(w http.ResponseWriter, r *http.Request) {
 	WriteOk(w)
 }
 
+// persist a new dinosaur to database - assigning to an open or new cage
 func (ah AppHandlers) AddDinosaur(w http.ResponseWriter, r *http.Request) {
 	// read payload
 	dino := Dinosaur{}
@@ -78,6 +85,7 @@ func (ah AppHandlers) AddDinosaur(w http.ResponseWriter, r *http.Request) {
 	WriteOk(w)
 }
 
+// create a new cage of the given dietary type
 func (ah AppHandlers) AddCage(w http.ResponseWriter, r *http.Request) {
 	var err error
 	vars := mux.Vars(r)
@@ -109,6 +117,8 @@ func (ah AppHandlers) AddCage(w http.ResponseWriter, r *http.Request) {
 		WriteMsg(w, http.StatusUnprocessableEntity, err.Error())
 		return
 	}
+
+	// write back using anonymous id struct
 	v := struct {
 		ID int `json:"id"`
 	}{
@@ -118,12 +128,13 @@ func (ah AppHandlers) AddCage(w http.ResponseWriter, r *http.Request) {
 	WriteMsg(w, http.StatusOK, string(b))
 }
 
+// list cages handler
 func (ah AppHandlers) GetCages(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var cages []Cage
 	activeOpt := r.URL.Query().Get("status")
 
-	// only apply filter is it exists and is valid
+	// only apply filter if it exists and is valid
 	if len(activeOpt) != 0 && ValidStatus(activeOpt) {
 		cages, err = ah.dap.GetCages(r.Context(), activeOpt)
 	} else {
@@ -141,6 +152,7 @@ func (ah AppHandlers) GetCages(w http.ResponseWriter, r *http.Request) {
 	WriteMsg(w, http.StatusOK, string(b))
 }
 
+// list handler for dinosaurs in a given cage
 func (ah AppHandlers) GetCageDinosaurs(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	paramCageID := vars["cageid"]
@@ -158,11 +170,11 @@ func (ah AppHandlers) GetCageDinosaurs(w http.ResponseWriter, r *http.Request) {
 		WriteMsg(w, http.StatusUnprocessableEntity, "database error : "+err.Error())
 		return
 	}
-	_ = dinoList
 	b, _ := json.Marshal(dinoList)
 	WriteMsg(w, http.StatusOK, string(b))
 }
 
+// add new species handler
 func (ah AppHandlers) AddSpecies(w http.ResponseWriter, r *http.Request) {
 	var species Species
 	err := json.NewDecoder(r.Body).Decode(&species)
@@ -175,6 +187,7 @@ func (ah AppHandlers) AddSpecies(w http.ResponseWriter, r *http.Request) {
 	WriteOk(w)
 }
 
+// list species handler
 func (ah AppHandlers) ListSpecies(w http.ResponseWriter, r *http.Request) {
 	var species []Species
 	ah.speciesMap.Range(func(name, diet string) bool {
@@ -189,7 +202,7 @@ func (ah AppHandlers) ListSpecies(w http.ResponseWriter, r *http.Request) {
 	WriteMsg(w, http.StatusOK, string(b))
 }
 
-// set the status of a specified cage
+// set the status of a specified cage handler
 func (ah AppHandlers) SetCageStatus(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	status := vars["status"]
@@ -215,6 +228,7 @@ func (ah AppHandlers) SetCageStatus(w http.ResponseWriter, r *http.Request) {
 	WriteOk(w)
 }
 
+// list dinosaur handler
 func (ah AppHandlers) GetDinosaurs(w http.ResponseWriter, r *http.Request) {
 	species := r.URL.Query().Get("species")
 	var err error
@@ -230,12 +244,13 @@ func (ah AppHandlers) GetDinosaurs(w http.ResponseWriter, r *http.Request) {
 	}
 	buf, err := json.Marshal(dinos)
 	if err != nil {
-		WriteMsg(w, http.StatusInternalServerError, "unable to marshal response"+err.Error())
+		WriteMsg(w, http.StatusInternalServerError, "unable to marshal response "+err.Error())
 		return
 	}
 	WriteMsg(w, http.StatusOK, string(buf))
 }
 
+// place dinosaur in cage handler
 func (ah AppHandlers) AddDinoToCage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	paramCageID := vars["cageid"]
@@ -264,7 +279,8 @@ func (ah AppHandlers) AddDinoToCage(w http.ResponseWriter, r *http.Request) {
 	WriteOk(w)
 }
 
-func StartServer(endPoint string, appHandlers *AppHandlers) error {
+// create mux and start server
+func StartServer(ctx context.Context, listenAddr string, appHandlers *AppHandlers) error {
 	r := mux.NewRouter()
 	r.HandleFunc("/healthcheck", appHandlers.healthcheck).Methods("GET")
 	r.HandleFunc("/dino/add", appHandlers.AddDinosaur).Methods("POST")
@@ -277,7 +293,19 @@ func StartServer(endPoint string, appHandlers *AppHandlers) error {
 	r.HandleFunc("/species/add", appHandlers.AddSpecies).Methods("POST")
 	r.HandleFunc("/species/list", appHandlers.ListSpecies).Methods("GET")
 
-	log.Printf("Starting serv on %s", endPoint)
-	err := (http.ListenAndServe(endPoint, r))
+	server := http.Server{
+		Addr:    listenAddr,
+		Handler: r,
+	}
+
+	// prepare for shutdown initiated from context
+	go func() {
+		<-ctx.Done()
+		// received context done
+		// shutdown server
+		server.Shutdown(context.Background())
+	}()
+	log.Printf("Starting serv on %s", listenAddr)
+	err := server.ListenAndServe()
 	return err
 }

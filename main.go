@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"os"
 	"os/signal"
+	"sync"
 
 	"dinocage/das"
 )
@@ -28,7 +30,8 @@ type EnvParams struct {
 	DbPass         string
 }
 
-func InitFromEnv() EnvParams {
+// extract params from env - should implement defaults
+func InitConfigFromEnv() EnvParams {
 	var ep EnvParams
 	ep.DbHost = os.Getenv(ENV_DB_HOST)
 	ep.DbPort = os.Getenv(ENV_DB_PORT)
@@ -47,7 +50,7 @@ var speciesFilename *string = flag.String("sf", "species.json", "species referen
 func main() {
 	flag.Parse()
 
-	envCfg := InitFromEnv()
+	envCfg := InitConfigFromEnv()
 	log.Printf("cfg : %+v\n", envCfg)
 
 	// read static species list
@@ -60,18 +63,33 @@ func main() {
 		return
 	}
 
+	// connect to database
 	dap, err := das.Connect(envCfg.DbHost, envCfg.DbPort, envCfg.DbUser, envCfg.DbPass, envCfg.DbName)
 	if err != nil {
 		log.Printf("unable to connect to database : %v", err)
 		return
 	}
+	ctx, cancel := context.WithCancel(context.Background())
+	var wg sync.WaitGroup
+	wg.Add(1)
 	go func() {
-		err := StartServer(envCfg.ServerEndpoint, &AppHandlers{dap: dap, speciesMap: speciesMap})
+		// start server in background
+		err := StartServer(ctx, envCfg.ServerEndpoint, &AppHandlers{dap: dap, speciesMap: speciesMap})
 		log.Printf("server returned %v - shutting down", err)
+		wg.Done()
 	}()
 
+	// keep server alive until
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt)
 	<-c
+	// try to shutdown gracefully
+
+	// cancel context to initiate server shutdown
+	cancel()
+	// wait for http server to shudown
+	wg.Wait()
+	// close database
+	dap.Close()
 	log.Printf("done...")
 }
