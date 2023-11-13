@@ -1,9 +1,5 @@
 package das
 
-import (
-	"errors"
-)
-
 type Dinosaur struct {
 	ID      uint   `json:"id"`
 	Species string `json:"species"`
@@ -11,11 +7,6 @@ type Dinosaur struct {
 	Diet    string `json:"diet"`
 	Cage    uint   `json:"cage"`
 }
-
-var (
-	ErrSpeciesBadName = errors.New("species name must not be empty or missing")
-	ErrSpeciesBadDiet = errors.New("species diet must be herbivore or carnivore")
-)
 
 const (
 	Herbivore     = "herbivore"
@@ -27,7 +18,7 @@ const (
 type Cage struct {
 	ID       int    `json:"id"`
 	Status   string `json:"status"`
-	Capacity int    `json:"capaciy"`
+	Capacity int    `json:"capacity"`
 	Count    int    `json:"count"`
 	Kind     string `json:"kind"`
 }
