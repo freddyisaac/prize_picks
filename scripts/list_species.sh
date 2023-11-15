@@ -1,4 +1,4 @@
 #!/bin/sh
 
-curl http://localhost:8000/species/list | jq
+curl http://localhost:8000/v1/species/list | jq
 

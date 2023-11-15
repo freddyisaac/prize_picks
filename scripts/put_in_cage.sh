@@ -31,4 +31,4 @@ while [[ $# -gt 0 ]]; do
 	esac
 done
 
-curl -X POST -d @${DINO_FILE} http://localhost:8000/cage/${CAGE_ID}/add_dino
+curl -X POST -d @${DINO_FILE} http://localhost:8000/v1/cage/${CAGE_ID}/add_dino

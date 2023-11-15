@@ -33,5 +33,5 @@ while [[ $# -gt 0 ]]; do
 		esac
 done
 
-curl -v -X POST http://localhost:8000/cage/${CAGE_DIET}/add${CAGE_PARAM}
+curl -v -X POST http://localhost:8000/v1/cage/${CAGE_DIET}/add${CAGE_PARAM}
 

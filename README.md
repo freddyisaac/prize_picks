@@ -93,52 +93,52 @@ The data model is quite simple and self explanatory. It is composed of only two 
 
 ## Rest Api definitions
 
-Typically the rest api would not be detailed here, but using swagger or some other means, but in the interest of brevity th following is a short description of the available rest sdk
+Typically the rest api would not be detailed here, but using swagger or some other means, but in the interest of brevity the following is a short description of the available rest sdk
 
-```GET /dino/list```
+```GET /v1/dino/list```
 
 Will return a full list of all saved dinosaurs in json. It does not paginate and so may provide a length list. An alternate for is available for filtering on species
 ```/dino/list?species=<species name>```
 
 As above but a species name is provided as a parameter. However as above this does not paginate and so could return a lengthy reply
 
-```GET /cages```
+```GET /v1/cages```
 
 This lists all cage information in json. As above as this may be quite extensive and so the paramater for may be used
 
-```GET /cages?status=<ACTIVE|DOWN>```
+```GET /v1/cages?status=<ACTIVE|DOWN>```
 
 This list cages in json for the provided status. Status must be either ACTIVE or DOWN. If an invalid status is given the server will return an error.
 
-```POST /cage/{diet}/add```
+```POST /v1/cage/{diet}/add```
 
 This will create a new cage for the given dietary requirements of the species to be placed therein. It takes no payload. The diet must be either _H_ or _C_ or an error will be returned. There is no payload for this and it will be ignored if passed. The reply upon success will be the numerical identifier of the cage in json format. This api call takes an optional ``cap=`` parameter that will specify the dinosaur capacity.
 
-```GET /cage/{cageid}/list_dinosaurs```
+```GET /v1/cage/{cageid}/list_dinosaurs```
 
 Returns a json response of the dinosaurs in a given cage.
 
-```POST /cage/{cageid}/status/{status}```
+```POST /v1/cage/{cageid}/status/{status}```
 
 Will set the given cage to the status _ACTIVE|DOWN_. If the cage is occupied the cage may not be powered down and will return an error
 
-```POST /cage/{cageid}/add_dino```
+```POST /v1/cage/{cageid}/add_dino```
 
 Will add a dinosaur to the json provided dinosaur to the specified cage. Upon success code _200_ is returned and an error if the cage is full or not of the correct dietary requirements. For reference the payload may be seen in the file ``scripts/dino_c.h``
 
-```POST /species/add```
+```POST /v1/species/add```
 
 Will add a new species to the in memory reference lookup. This is not persisted and so will not be available when the server is restarted. Additionally it is scoped to the receiving server instance and as such will not propagate in a clustered environment. An example payload for this can be found in  ``scripts/add_species.sh`` script.
 
-```GET /species/list```
+```GET /v1/species/list```
 
 returns a json formatted list of available species. The result is not paginated and is returned from the memory cache.
 
-```POST /cage/{cageid}/add_dino```
+```POST /v1/cage/{cageid}/add_dino```
 
 Places a dinosaur from the provided payload into the given cage. Examples of json payload for a dinosaur can be seen in ``scripts/dino_c.json```
 
-```POST /dino```
+```POST /v1/dino```
 
 This is a general purpose add dinosaur functionality. It takes a json dinosaur payload of which an example can be seen in ``scripts/dino_c.json``.
 
@@ -170,7 +170,7 @@ Set the status of a given cage to the provided status
 
 ```add_cage.sh -diet <H|C> -cap <capacity>```
 
-Create a new cage of th specified dietary requirements. It takes a single paramater specifying the dietary requirements.
+Create a new cage of the specified dietary requirements. It takes a single paramater specifying the dietary requirements.
 
 ```put_in_cage.sh -id <cage id> -f <json file with dino info>```
 
@@ -191,7 +191,7 @@ should recreate them and place the generated output in the ``mocks/`` directory
 5. Relax condition that a cage must be created for an explicit diet
 6. The cage capacity should be configurable
 7. Improve error messages from the data access layer
-8. Improve the documentation for th rest api
+8. Improve the documentation for the rest api
 9. Code comments
 10. No mechanism exists for removing dinosaurs, removing cages or transferring dinosaurs between cages
 11. Versioning on the rest api

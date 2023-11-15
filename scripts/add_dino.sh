@@ -6,5 +6,5 @@ else
 DINO_FILE=$1
 fi
 
-curl -v -X POST -d @$DINO_FILE http://localhost:8000/dino/add
+curl -v -X POST -d @$DINO_FILE http://localhost:8000/v1/dino/add
 
