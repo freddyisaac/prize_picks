@@ -12,13 +12,13 @@ import (
 )
 
 const (
-	ENV_DB_HOST      = "ENV_DB_HOST"
-	ENV_DB_PORT      = "ENV_DB_PORT"
-	ENV_DB_NAME      = "ENV_DB_NAME"
-	ENV_DB_USR       = "ENV_DB_USR"
-	ENV_DB_PASS      = "ENV_DB_PWD"
-	ENV_SVR_ENDPOINT = "ENV_SVR_ENDPOINT"
-	DefaultEndpoint  = ":8000"
+	EnvDBHost       = "ENV_DB_HOST"
+	EnvDBPort       = "ENV_DB_PORT"
+	EnvDBName       = "ENV_DB_NAME"
+	EnvDBUsr        = "ENV_DB_USR"
+	EnvDBPass       = "ENV_DB_PWD"
+	EnvSvrEndpoint  = "ENV_SVR_ENDPOINT"
+	DefaultEndpoint = ":8000"
 )
 
 type EnvParams struct {
@@ -33,12 +33,12 @@ type EnvParams struct {
 // extract params from env - should implement defaults
 func InitConfigFromEnv() EnvParams {
 	var ep EnvParams
-	ep.DbHost = os.Getenv(ENV_DB_HOST)
-	ep.DbPort = os.Getenv(ENV_DB_PORT)
-	ep.DbName = os.Getenv(ENV_DB_NAME)
-	ep.DbUser = os.Getenv(ENV_DB_USR)
-	ep.DbPass = os.Getenv(ENV_DB_PASS)
-	ep.ServerEndpoint = os.Getenv(ENV_SVR_ENDPOINT)
+	ep.DbHost = os.Getenv(EnvDBHost)
+	ep.DbPort = os.Getenv(EnvDBPort)
+	ep.DbName = os.Getenv(EnvDBName)
+	ep.DbUser = os.Getenv(EnvDBUsr)
+	ep.DbPass = os.Getenv(EnvDBPass)
+	ep.ServerEndpoint = os.Getenv(EnvSvrEndpoint)
 	if len(ep.ServerEndpoint) == 0 {
 		ep.ServerEndpoint = DefaultEndpoint
 	}
